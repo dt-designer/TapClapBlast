@@ -1,0 +1,8 @@
+{
+  "steps": 25,
+  "score": 200,
+  "bonuses": {
+    "bomb": 1,
+    "teleport": 3
+  }
+}
