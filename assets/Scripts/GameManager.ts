@@ -167,7 +167,7 @@ export class GameScene extends Component {
             for (let col = 0; col < this._gameFieldBlocks[row].length; col++) {
                 if (this._gameFieldBlocks[row][col].control) {
                     this._gameFieldBlocks[row][col].control.blockNode
-                        .on(Node.EventType.MOUSE_DOWN, () =>
+                        .on(Node.EventType.TOUCH_START, () =>
                             this._blockAction(this._gameFieldBlocks[row][col].type, row, col), this);
                 }
             }
@@ -177,7 +177,7 @@ export class GameScene extends Component {
         for (const row of this._gameFieldBlocks) {
             for (const block of row) {
                 if (block.control) {
-                    block.control.blockNode.off(Node.EventType.MOUSE_DOWN);
+                    block.control.blockNode.off(Node.EventType.TOUCH_START);
                 }
             }
         }

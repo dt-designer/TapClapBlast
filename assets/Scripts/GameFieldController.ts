@@ -97,7 +97,7 @@ export class GameFieldController extends Component {
     private _generateSymbol(): BlockType {
         // Получаем массив со значениями Enum, кроме исключенного ключа
         const values = Object.values(BlockType).filter(
-            (value: BlockType) => typeof value === 'number' && value !== BlockType.BT_N && value !== BlockType.BT_E
+            (value: BlockType) => typeof value === 'number' && value !== BlockType.BT_N
         ) as BlockType[];
         // Функция для получения случайного символа из массива
         const getRandomSymbol = () => {
