@@ -102,7 +102,7 @@ export class GameScene extends Component {
         }
     }
 
-    private async _boosterBombAction(row: number, col: number): void {
+    private async _boosterBombAction(row: number, col: number): Promise<void> {
         await this._gameField.showBoosterIcon(row, col, BoosterType.BOMB);
         const boosterController = new BoosterBombController(this.XCount, this.YCount, this._gameFieldBlocks, this._boosters.bomb.settings.indent);
         const blocksForRemove = boosterController.activate(row, col);
