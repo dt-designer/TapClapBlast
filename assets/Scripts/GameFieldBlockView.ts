@@ -13,6 +13,7 @@ export class GameFieldBlockView extends Component {
     private readonly _bangSprite: Node | null = null;
     private readonly _bombSprite: Node | null = null;
     private readonly _teleportSprite: Node | null = null;
+    private readonly _blockMarkSprite: Node | null = null;
 
     constructor(
         protected blockArea: Node,
@@ -36,6 +37,7 @@ export class GameFieldBlockView extends Component {
             this._bangSprite = this._blockNode.getChildByName('Bang')
             this._bombSprite = this._blockNode.getChildByName('Bomb')
             this._teleportSprite = this._blockNode.getChildByName('Teleport')
+            this._blockMarkSprite = this._blockNode.getChildByName('BlockMark')
 
             this._blockNode.setPosition((col * blockSize) + this._blockOffset, -(row * blockSize) - this._blockOffset - 8)
             this._blockNode.setParent(this.blockArea);
@@ -63,11 +65,21 @@ export class GameFieldBlockView extends Component {
             if (this._teleportSprite) {
                 this._teleportSprite.setScale(new Vec3(0, 0))
             }
+
+            if (this._blockMarkSprite) {
+                this._blockMarkSprite.active = false
+            }
         }
     }
 
     get blockNode(): Node | null {
         return this._blockNode;
+    }
+
+    toggleBlockMarked(active: boolean): void {
+        if (this._blockMarkSprite) {
+            this._blockMarkSprite.active = active
+        }
     }
 
     setBoosterIcon(type: BoosterType): void {

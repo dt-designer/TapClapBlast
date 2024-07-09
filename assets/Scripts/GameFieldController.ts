@@ -54,7 +54,7 @@ export class GameFieldController extends Component {
     }
     async showBoosterIcon(row: number, col: number, boosterType: BoosterType): Promise<void> {
         this._gameFieldBlocks[row][col].control.setBoosterIcon(boosterType)
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
     async handleBlockBurning(blocksBackUp: IBlockBackUp[], isOutsideEffect: boolean = false): Promise<number> {
@@ -76,6 +76,7 @@ export class GameFieldController extends Component {
             await this._respawnEmptyBlocks();
             return blocksBackUp.length;
         } else {
+
             this._restoreBlocks(blocksBackUp);
             return 0;
         }
@@ -91,7 +92,37 @@ export class GameFieldController extends Component {
     }
 
     async setBlockAction(type: BlockType, row: number, col: number): Promise<number> {
-        return await this._checkNeighbors(type, row, col);
+        return await this.checkNeighbors(type, row, col);
+    }
+
+    async checkNeighbors(type: BlockType, row: number, col: number, onlyHighlight?: boolean): Promise<number> { // Возвращаем колличество уничтоженых блоков
+        const blocksBackUp: IBlockBackUp[] = []
+        const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // Право, Низ, Лево, Верх
+
+        // Функция для проверки ячейки и ее соседей
+        const checkBlock = async (x: number, y: number) => {
+            if (x >= 0 && x < this._XCount && y >= 0 && y < this._YCount && this._gameFieldBlocks[x][y].type === type) {
+
+                // Выжигание ячейки
+                this._gameFieldBlocks[x][y].control.toggleBlockMarked(true);
+                blocksBackUp.push({ ...this._gameFieldBlocks[x][y], row: x, col: y });
+                this._gameFieldBlocks[x][y].type = BlockType.BT_N;
+                this._gameFieldBlocks[x][y].control = null;
+
+                await new Promise((resolve) => setTimeout(resolve, 30));
+
+                // Рекурсивный вызов для соседних ячеек
+                for (const [dx, dy] of directions) {
+                    await checkBlock(x + dx, y + dy);
+                }
+            }
+        };
+
+        // Запускаем поиск
+        await checkBlock(row, col);
+        if (!onlyHighlight) {
+            return this.handleBlockBurning(blocksBackUp)
+        }
     }
 
     private _generateSymbol(): BlockType {
@@ -128,34 +159,11 @@ export class GameFieldController extends Component {
         return new GameFieldBlockView(this.BlocksArea, row, col, type, prefab, this._blockSize, reborn);
     }
 
-    private async _checkNeighbors(type: BlockType, row: number, col: number): Promise<number> { // Возвращаем колличество уничтоженых блоков
-        const blocksBackUp: IBlockBackUp[] = []
-        const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // Право, Низ, Лево, Верх
-
-        // Функция для проверки ячейки и ее соседей
-        const checkBlock = async (x: number, y: number) => {
-            if (x >= 0 && x < this._XCount && y >= 0 && y < this._YCount && this._gameFieldBlocks[x][y].type === type) {
-                // Выжигание ячейки
-                blocksBackUp.push({ ...this._gameFieldBlocks[x][y], row: x, col: col });
-                this._gameFieldBlocks[x][y].type = BlockType.BT_N;
-                this._gameFieldBlocks[x][y].control = null;
-                // Рекурсивный вызов для соседних ячеек
-                for (const [dx, dy] of directions) {
-                    await checkBlock(x + dx, y + dy);
-                }
-            }
-        };
-
-        // Запускаем поиск
-        await checkBlock(row, col);
-
-        return this.handleBlockBurning(blocksBackUp)
-    }
-
     private _restoreBlocks(blocksBackUp: IBlockBackUp[]) {
         for (const block of blocksBackUp) {
             this._gameFieldBlocks[block.row][block.col].type = block.type
             this._gameFieldBlocks[block.row][block.col].control = block.control
+            this._gameFieldBlocks[block.row][block.col].control.toggleBlockMarked(false);
             this._gameFieldBlocks[block.row][block.col].control.wrongAttempt()
         }
     }
